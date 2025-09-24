@@ -1,473 +1,423 @@
 import React, { useState, useEffect } from "react";
-import Category from "./category";
-import SeoData from "../../SEO/SeoData";
-import ScrollToTopOnRouteChange from "../../utils/ScrollToTopOnRouteChange";
-import MinCategory from "../../components/MinCategory";
+import { useNavigate } from "react-router-dom";
 
-const products = [
+
+// Mock ProductCard component (replace with actual ProductCard)
+const ProductCard = ({ product }) => (
+  <div className="border rounded-lg p-4 shadow-md hover:shadow-lg transition">
+    <img src={product.image} alt={product.name} className="w-full h-40 object-cover rounded" />
+    <h3 className="text-lg font-semibold mt-2">{product.name}</h3>
+    <p className="text-gray-600">{product.description}</p>
+  </div>
+);
+
+// Mock assets (replace with actual image paths or imports)
+const assets = {
+  header_headphone_image: "path/to/headphone-image.jpg",
+  header_playstation_image: "path/to/playstation-image.jpg",
+  header_macbook_image: "path/to/macbook-image.jpg",
+  arrow_icon: "path/to/arrow-icon.png",
+};
+
+// Mock products data (replace with actual data from context or API)
+const mockProducts = [
   {
     id: 1,
-    name: "Wireless Headphones",
-    description: "Experience premium sound quality with noise cancellation.",
-    price: "$120",
-    image: "https://images.unsplash.com/photo-1519677100203-a0e668c92439?auto=format&fit=crop&w=400&q=80",
-    feature: "40hr Battery",
+    name: "Wireless Earbuds",
+    description: "High-quality wireless earbuds with noise cancellation",
+    image: "https://i.pinimg.com/736x/e2/7c/89/e27c89722b03c92d0e2fef16fbc29863.jpg",
   },
   {
     id: 2,
-    name: "Bluetooth Earbuds",
-    description: "Compact, stylish, and perfect for on-the-go listening.",
-    price: "$80",
-    image: "https://images.unsplash.com/photo-1511367461989-f85a21fda167?auto=format&fit=crop&w=400&q=80",
-    feature: "IPX7 Waterproof",
+    name: "USB-C Charger",
+    description: "Fast-charging USB-C cable for smartphones",
+    image: "https://chargingcable.in/cdn/shop/files/1_b5035f15-621e-49aa-843d-ae9ea35a5402_1.jpg?v=1748060807&width=1080",
   },
   {
     id: 3,
-    name: "Portable Bluetooth Speaker",
-    description: "Fill any room with rich, immersive sound.",
-    price: "$65",
-    image: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=400&q=80",
-    feature: "360° Surround",
+    name: "Car Bluetooth",
+    description: "Bluetooth device for car audio systems",
+    image: "https://www.jiomart.com/images/product/original/rvhadyiwd4/crust-cs30-car-bluetooth-device-with-call-receiver-fm-transmitter-for-music-system-dual-usb-type-c-fast-charger-7-colour-led-lights-6-equalizer-presets-usb-mp3-audio-playback-voice-assistant-legal-images-orvhadyiwd4-p601894899-3-202305271549.jpg?im=Resize=(420,420)",
+  },
+];
+
+// Use cases data for FlowDiagram
+const useCases = [
+  {
+    id: 1,
+    title: "Mobile Shops",
+    description: "Bulk mobile accessories for retail shops",
+    icon: "https://images.unsplash.com/photo-1598327105666-5b89351aff97?fm=jpg&q=60&w=3000&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8bW9iaWxlJTIwcGhvbmV8ZW58MHx8MHx8fDA%3D",
+  },
+  {
+    id: 2,
+    title: "Bike Accessories Retailers",
+    description: "Wires, stands, and hands-free devices for bike shops",
+    icon: "https://images.pexels.com/photos/2116475/pexels-photo-2116475.jpeg?cs=srgb&dl=pexels-nicholas-dias-1119542-2116475.jpg&fm=jpg",
+  },
+  {
+    id: 3,
+    title: "Office Supplies",
+    description: "Bulk keyboards, mice, and chargers for office setups",
+    icon: "https://images.pexels.com/photos/265072/pexels-photo-265072.jpeg?cs=srgb&dl=pexels-pixabay-265072.jpg&fm=jpg",
   },
   {
     id: 4,
-    name: "Gaming Headset",
-    description: "Crystal clear audio for an immersive gaming experience.",
-    price: "$95",
-    image: "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?auto=format&fit=crop&w=400&q=80",
-    feature: "RGB Lighting",
+    title: "E-commerce Sellers",
+    description: "Ready-to-ship accessories for online stores",
+    icon: "https://images.pexels.com/photos/7974/pexels-photo.jpg?auto=compress&cs=tinysrgb&dpr=1&w=500",
   },
 ];
 
-const testimonials = [
-  {
-    name: "Amit Sharma",
-    text: "Best wholesale prices and super fast delivery. My go-to for electronics!",
-    avatar: "https://randomuser.me/api/portraits/men/32.jpg",
-  },
-  {
-    name: "Priya Verma",
-    text: "Loved the support and the quality of products. Highly recommended!",
-    avatar: "https://randomuser.me/api/portraits/women/44.jpg",
-  },
-  {
-    name: "Rahul Singh",
-    text: "Huge variety and unbeatable deals. My business profits have grown!",
-    avatar: "https://randomuser.me/api/portraits/men/65.jpg",
-  },
-];
+const HomePage = ({ searchKeyword = "" }) => {
+  const navigate = useNavigate();
 
-const banners = [
-  "https://images.unsplash.com/photo-1581090700227-6b67f8ec3f1a?auto=format&fit=crop&w=400&q=80",
-  "https://images.unsplash.com/photo-1593642634443-44adaa06623a?auto=format&fit=crop&w=400&q=80",
-  "https://images.unsplash.com/photo-1612832021304-0f7de5b8e01c?auto=format&fit=crop&w=400&q=80",
-];
+  // Slider state and logic
+  const sliderData = [
+    {
+      id: 1,
+      title: "Stock High-Quality Wires and Chargers for Your Store!",
+      offer: "Limited Time Wholesale Offer",
+      buttonText1: "Shop Now",
+      buttonText2: "Explore More",
+      imgSrc: assets.header_headphone_image,
+    },
+    {
+      id: 2,
+      title: "Upgrade Your Accessories Inventory with Earbuds & Headsets!",
+      offer: "Bulk Deals Available",
+      buttonText1: "Order Now",
+      buttonText2: "View Collection",
+      imgSrc: assets.header_playstation_image,
+    },
+    {
+      id: 3,
+      title: "Get Essential Office & Gaming Accessories in Bulk Today!",
+      offer: "Exclusive Wholesale Discounts",
+      buttonText1: "Buy in Bulk",
+      buttonText2: "Learn More",
+      imgSrc: assets.header_macbook_image,
+    },
+  ];
 
-const Home = () => {
-  const [bannerIndex, setBannerIndex] = useState(0);
+  const categories = [
+    {
+      id: 1,
+      name: "Handsfree",
+      image: "https://www.geeky-gadgets.com/wp-content/uploads/2014/05/earpods.jpg",
+    },
+    {
+      id: 2,
+      name: "Earbuds",
+      image: "https://i.pinimg.com/736x/e2/7c/89/e27c89722b03c92d0e2fef16fbc29863.jpg",
+    },
+    {
+      id: 3,
+      name: "Mix Items",
+      image: "https://img.freepik.com/free-photo/close-up-artist-making-music_23-2149199987.jpg?semt=ais_hybrid&w=740&q=80",
+    },
+    {
+      id: 4,
+      name: "Car Bluetooth",
+      image: "https://www.jiomart.com/images/product/original/rvhadyiwd4/crust-cs30-car-bluetooth-device-with-call-receiver-fm-transmitter-for-music-system-dual-usb-type-c-fast-charger-7-colour-led-lights-6-equalizer-presets-usb-mp3-audio-playback-voice-assistant-legal-images-orvhadyiwd4-p601894899-3-202305271549.jpg?im=Resize=(420,420)",
+    },
+    {
+      id: 5,
+      name: "OTG Cables",
+      image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQnZ6SuUmqu0wa4nB7KHsI9Al7eh3RvMkJHog&s",
+    },
+    {
+      id: 6,
+      name: "Car Chargers",
+      image: "https://images.philips.com/is/image/philipsconsumer/0b370bab54c442dfa0bdb0c100abfa7a?$pnglarge$&wid=1250",
+    },
+    {
+      id: 7,
+      name: "Cables and Chargers",
+      image: "https://chargingcable.in/cdn/shop/files/1_b5035f15-621e-49aa-843d-ae9ea35a5402_1.jpg?v=1748060807&width=1080",
+    },
+    {
+      id: 8,
+      name: "Battery",
+      image: "https://www.popsci.com/wp-content/uploads/2020/03/23/hands-holding-phone-with-dead-battery-advisory.jpg?quality=85",
+    },
+    {
+      id: 9,
+      name: "Selfie Sticks",
+      image: "https://cdn.sanity.io/images/3azemr64/production/0af7b94e8cea2b42968c16720a3ab9011c2d3f58-1024x768.jpg?auto=format&w=873&h=655&crop=center&fit=crop&q=90",
+    },
+    {
+      id: 10,
+      name: "Car and Bike Stand",
+      image: "https://holdfast.co.za/wp-content/uploads/2024/11/Versa-Bike-Stand_Holdfast_Oct24_Boulle_1.jpg",
+    },
+  ];
+
+  const [currentSlide, setCurrentSlide] = useState(0);
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setBannerIndex((prev) => (prev + 1) % banners.length);
-    }, 4000);
+      setCurrentSlide((prev) => (prev + 1) % sliderData.length);
+    }, 3000);
     return () => clearInterval(interval);
-  }, []);
+  }, [sliderData.length]);
+
+  const handleSlideChange = (index) => {
+    setCurrentSlide(index);
+  };
+
+  const handleCategoryClick = (categoryName) => {
+    navigate(`/all-products?category=${encodeURIComponent(categoryName)}`);
+  };
+
+  // Filter products based on searchKeyword
+  const filteredProducts = mockProducts.filter((p) =>
+    p.name.toLowerCase().includes(searchKeyword.toLowerCase())
+  );
 
   return (
-    <>
-      <SeoData title="Premium Electronics Wholesale | Latest Tech & Bulk Deals" />
-      <ScrollToTopOnRouteChange />
-      <MinCategory />
-      <div className="min-h-screen bg-white text-sky-900 font-sans overflow-x-hidden">
-        {/* Hero Section */}
-        <section className="relative w-full bg-gradient-to-r from-blue-100 via-sky-50 to-blue-100 py-28 px-6">
-  <div className="max-w-7xl mx-auto flex flex-col-reverse md:flex-row items-center justify-between bg-white/70 rounded-xl shadow-xl overflow-hidden animate-fadeInBanner relative">
-    
-    {/* Accent behind image */}
-    <div className="absolute right-0 top-0 w-80 h-80 bg-gradient-to-tr from-blue-200 via-blue-300 to-transparent rounded-full -z-10 opacity-60"></div>
-
-    {/* Text */}
-    <div className="md:pl-12 mt-10 md:mt-0 flex-1 relative">
-      <div className="absolute left-0 top-8 w-20 h-2 bg-blue-400 skew-x-12 rounded-full opacity-70 -z-10"></div>
-      <p className="text-blue-500 font-medium md:text-base pb-2">Limited Time Wholesale Offer</p>
-      <h1 className="text-gray-800 font-semibold text-3xl md:text-5xl md:leading-tight max-w-lg">
-        Stock High-Quality Wires and Chargers for Your Store!
-      </h1>
-      <div className="flex gap-4 mt-6">
-        <button className="bg-blue-500 text-white rounded-full px-8 py-3 font-medium hover:scale-105 hover:shadow-lg transition-transform duration-300">
-          Shop Now
-        </button>
-        <button className="border border-blue-500 text-blue-500 rounded-full px-6 py-3 font-medium hover:bg-blue-50 hover:shadow-md transition duration-300">
-          Explore More
-        </button>
-      </div>
-    </div>
-
-    {/* Image */}
-    <div className="flex justify-center flex-1 md:justify-end relative">
-      <img
-        className="w-72 md:w-96 rounded-3xl shadow-2xl object-cover"
-        src="https://images.pexels.com/photos/577769/pexels-photo-577769.jpeg"
-        alt="Banner"
-      />
-    </div>
-  </div>
-
-  <style>{`
-    @keyframes fadeInBanner {
-      0% { opacity: 0; transform: translateY(30px); }
-      100% { opacity: 1; transform: translateY(0); }
-    }
-    .animate-fadeInBanner {
-      animation: fadeInBanner 1.5s ease-out forwards;
-    }
-  `}</style>
-</section>
-
-
-        {/* Features Section - Glassmorphism Cards */}
-        <section className="py-24 px-6 bg-gradient-to-r from-sky-50 via-white to-sky-50">
-  <h2 className="text-3xl md:text-4xl font-bold text-center text-sky-700 mb-16">
-    Why Businesses Choose Us
-  </h2>
-
-  <div className="flex flex-wrap justify-center items-end gap-12">
-    {[
-      {
-        img: "https://images.pexels.com/photos/3184465/pexels-photo-3184465.jpeg?auto=compress&cs=tinysrgb&w=400",
-        title: "Bulk Orders",
-        desc: "Save more with special pricing for businesses and resellers."
-      },
-      {
-        img: "https://images.pexels.com/photos/3184290/pexels-photo-3184290.jpeg?auto=compress&cs=tinysrgb&w=400",
-        title: "Warranty & Support",
-        desc: "All products come with manufacturer warranty and 24/7 support."
-      },
-      {
-        img: "https://images.pexels.com/photos/3184310/pexels-photo-3184310.jpeg?auto=compress&cs=tinysrgb&w=400",
-        title: "Express Shipping",
-        desc: "Lightning-fast delivery across India with real-time tracking."
-      },
-    ].map((feature, idx) => (
-      <div
-        key={idx}
-        className="flex flex-col items-center text-center animate-float"
-        style={{ animationDelay: `${idx * 0.3}s` }}
-      >
-        {/* Hand-drawn circle effect using clip-path */}
-        <div className="w-40 h-40 md:w-48 md:h-48 relative overflow-hidden shadow-xl">
-          <div className="absolute inset-0 bg-black/10 rounded-full clip-handmade"></div>
-          <img
-            src={feature.img}
-            alt={feature.title}
-            className="w-full h-full object-cover rounded-full clip-handmade"
-          />
-        </div>
-        <h3 className="text-xl md:text-2xl font-bold text-sky-700 mt-4">{feature.title}</h3>
-        <p className="text-sky-600 text-sm md:text-base mt-1 max-w-xs">{feature.desc}</p>
-      </div>
-    ))}
-  </div>
-
-  <style>
-    {`
-      @keyframes float {
-        0%, 100% { transform: translateY(0) rotate(0deg); }
-        50% { transform: translateY(-12px) rotate(2deg); }
-      }
-      .animate-float {
-        animation: float 5s ease-in-out infinite;
-      }
-
-      /* Handmade circle clip-path */
-      .clip-handmade {
-        clip-path: polygon(
-          50% 0%, 65% 5%, 80% 20%, 90% 40%, 85% 65%, 70% 80%,
-          50% 85%, 30% 80%, 15% 65%, 10% 40%, 20% 20%, 35% 5%
-        );
-      }
-    `}
-  </style>
-</section>
-
-
-        {/* Products Section - Hover Zoom + 3D Tilt */}
-        <section id="products" className="py-16 px-6 bg-white">
-          <h2 className="text-3xl md:text-4xl font-bold text-center text-sky-700 mb-12 animate-slideUp">Featured Products</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10">
-            {products.map((product, idx) => (
-              <div
-                key={product.id}
-                className="bg-white rounded-3xl border border-sky-100 shadow-lg p-6 flex flex-col items-center text-center hover:scale-105 hover:rotate-3d transition-transform duration-300 perspective animate-fadeIn"
-                style={{ animationDelay: `${idx * 0.1}s` }}
-              >
-                <img
-                  src={product.image}
-                  alt={product.name}
-                  className="w-32 h-32 object-cover rounded-xl mb-4 border-2 border-sky-200 hover:scale-110 transition-transform duration-300"
-                />
-                <h3 className="text-xl font-semibold text-sky-800">{product.name}</h3>
-                <p className="text-sky-600">{product.description}</p>
-                <span className="mt-2 inline-block bg-sky-200 text-sky-700 px-3 py-1 rounded-full text-xs font-semibold">{product.feature}</span>
-                <span className="mt-2 text-lg font-bold text-sky-500">{product.price}</span>
-                <button className="mt-4 px-6 py-2 bg-gradient-to-r from-sky-400 to-blue-400 text-white rounded-full font-semibold hover:scale-105 transition-transform duration-300">Buy Wholesale</button>
+    <div className="w-full pt-16">
+      {/* Header Slider Section */}
+      <div className="overflow-hidden relative w-full">
+        <div
+          className="flex transition-transform duration-700 ease-in-out"
+          style={{
+            transform: `translateX(-${currentSlide * 100}%)`,
+          }}
+        >
+          {sliderData.map((slide, index) => (
+            <div
+              key={slide.id}
+              className="flex flex-col-reverse md:flex-row items-center justify-between bg-[#E6E9F2] py-8 md:px-14 px-5 mt-6 rounded-xl min-w-full"
+            >
+              <div className="md:pl-8 mt-10 md:mt-0">
+                <p className="md:text-base text-[#54B1CE] pb-1 font-medium">{slide.offer}</p>
+                <h1 className="max-w-lg md:text-[40px] md:leading-[48px] text-2xl font-semibold text-gray-800">
+                  {slide.title}
+                </h1>
+                <div className="flex items-center mt-4 md:mt-6 gap-4">
+                  <button
+                    onClick={() => navigate("/all-products")}
+                    className="md:px-10 px-7 md:py-2.5 py-2 bg-[#54B1CE] rounded-full text-white font-medium hover:bg-[#3a9cb8] transition-colors"
+                  >
+                    {slide.buttonText1}
+                  </button>
+                  <button
+                    onClick={() => navigate("/all-products")}
+                    className="group flex items-center gap-2 px-6 py-2.5 font-medium text-[#54B1CE] border border-[#54B1CE] rounded-full hover:bg-[#54B1CE] hover:text-white transition-colors"
+                  >
+                    {slide.buttonText2}
+                    <img
+                      className="group-hover:translate-x-1 transition"
+                      src={assets.arrow_icon}
+                      alt="arrow_icon"
+                    />
+                  </button>
+                </div>
               </div>
-            ))}
-          </div>
-        </section>
+              <div className="flex items-center flex-1 justify-center">
+                <img
+                  className="md:w-72 w-48"
+                  src={slide.imgSrc}
+                  alt={`Slide ${index + 1}`}
+                />
+              </div>
+            </div>
+          ))}
+        </div>
 
-        {/* About Section - Banner + Text */}
-        <section className="py-16 px-6 bg-white/90 relative overflow-hidden">
-  <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center gap-10 relative z-10">
-    {/* Left Side - Text */}
-    <div className="md:w-1/2 space-y-6 animate-slideUp">
-      <h2 className="text-3xl md:text-4xl font-bold text-sky-700">About Our Company</h2>
-      <p className="text-sky-700 text-lg">
-        We provide top-quality electronics at wholesale prices with fast shipping, secure payments, and dedicated support.
-      </p>
-      <ul className="space-y-3 text-sky-600 font-medium">
-        <li className="flex items-center gap-2"><span className="text-sky-500 text-xl">✓</span> Bulk Discounts</li>
-        <li className="flex items-center gap-2"><span className="text-sky-500 text-xl">✓</span> Latest Tech Gadgets</li>
-        <li className="flex items-center gap-2"><span className="text-sky-500 text-xl">✓</span> Fast & Secure Shipping</li>
-        <li className="flex items-center gap-2"><span className="text-sky-500 text-xl">✓</span> Dedicated Support</li>
-      </ul>
-    </div>
-
-    {/* Right Side - Slideshow Images */}
-    <div className="md:w-1/2 flex justify-center relative">
-      <div className="w-72 h-80 md:w-96 md:h-96 rounded-3xl overflow-hidden border-2 border-white/20 bg-white/10 backdrop-blur-md shadow-xl relative">
-        {[0,1,2].map((idx) => (
-          <img
-            key={idx}
-            src={`https://images.pexels.com/photos/318446${idx+1}/pexels-photo-318446${idx+1}.jpeg?auto=compress&cs=tinysrgb&w=400`}
-            alt={`About Image ${idx+1}`}
-            className={`absolute w-full h-full object-cover transition-opacity duration-1000 ease-in-out ${
-              idx === 0 ? 'opacity-100' : 'opacity-0'
-            } slideImage-${idx}`}
-          />
-        ))}
-      </div>
-    </div>
-  </div>
-
-  {/* Slideshow Animation */}
-  <style>
-    {`
-      .slideImage-0, .slideImage-1, .slideImage-2 {
-        animation: slideshow 12s infinite;
-      }
-      .slideImage-0 { animation-delay: 0s; }
-      .slideImage-1 { animation-delay: 4s; }
-      .slideImage-2 { animation-delay: 8s; }
-
-      @keyframes slideshow {
-        0% { opacity: 0; }
-        8% { opacity: 1; }
-        33% { opacity: 1; }
-        41% { opacity: 0; }
-        100% { opacity: 0; }
-      }
-    `}
-  </style>
-</section>
-
-        {/* Testimonials Section - Card Flip */}
-        <section className="py-16 px-6 bg-gradient-to-br from-sky-50 via-white to-sky-50 relative overflow-hidden">
-  <h2 className="text-3xl font-bold text-center text-sky-700 mb-12 animate-slideUp">
-    What Our Customers Say
-  </h2>
-
-  <div className="flex flex-wrap justify-center gap-12 max-w-6xl mx-auto">
-    {testimonials.map((t, idx) => (
-      <div
-        key={idx}
-        className="w-64 h-64 rounded-full perspective group animate-fadeIn"
-        style={{ animationDelay: `${0.2 * idx}s`, animationFillMode: "both" }}
-      >
-        <div className="relative w-full h-full transition-transform duration-700 transform-style-preserve-3d group-hover:rotate-y-180 hover:scale-105">
-          {/* Front */}
-          <div className="absolute w-full h-full rounded-full backface-hidden bg-white border-2 border-sky-200 flex flex-col items-center justify-center shadow-xl p-6 animate-floatCard">
-            <img
-              src={t.avatar}
-              alt={t.name}
-              className="w-16 h-16 rounded-full mb-3 border-2 border-sky-400"
-            />
-            <p className="text-sky-700 italic text-center">"{t.text}"</p>
-          </div>
-          {/* Back */}
-          <div className="absolute w-full h-full rounded-full backface-hidden rotate-y-180 bg-sky-100 border-2 border-sky-200 flex items-center justify-center shadow-xl p-6">
-            <h3 className="text-sky-700 font-bold text-lg text-center">{t.name}</h3>
-          </div>
+        <div className="flex items-center justify-center gap-2 mt-8">
+          {sliderData.map((_, index) => (
+            <div
+              key={index}
+              onClick={() => handleSlideChange(index)}
+              className={`h-2 w-2 rounded-full cursor-pointer ${
+                currentSlide === index ? "bg-[#54B1CE]" : "bg-gray-500/30"
+              }`}
+            ></div>
+          ))}
         </div>
       </div>
-    ))}
-  </div>
 
-  {/* Animations */}
-  <style>
-    {`
-      .perspective {
-        perspective: 1000px;
-      }
-      .backface-hidden {
-        backface-visibility: hidden;
-      }
-      .rotate-y-180 {
-        transform: rotateY(180deg);
-      }
-      .animate-fadeIn {
-        animation: fadeIn 1s ease forwards;
-      }
-      @keyframes fadeIn {
-        0% { opacity: 0; transform: translateY(20px);}
-        100% { opacity: 1; transform: translateY(0);}
-      }
-      .animate-floatCard {
-        animation: floatCard 4s ease-in-out infinite;
-      }
-      @keyframes floatCard {
-        0%, 100% { transform: translateY(0);}
-        50% { transform: translateY(-10px);}
-      }
-    `}
-  </style>
-</section>
+      {/* Categories Grid Section */}
+      <div className="mt-12">
+        <div className="text-center mb-8">
+          <h2 className="text-3xl font-bold text-gray-800">Shop by Category</h2>
+          <p className="text-gray-600 mt-2">Explore our wide range of electronic accessories</p>
+          <div className="w-24 h-1 bg-[#54B1CE] rounded-full mt-2 mx-auto"></div>
+        </div>
 
-
-        {/* Call To Action Section - Entrance Animation */}
-        <section className="py-16 px-6 bg-gradient-to-r from-sky-200 via-blue-100 to-sky-50 flex flex-col md:flex-row items-center justify-between gap-10 relative overflow-hidden">
-  {/* Left Side - Text */}
-  <div className="md:w-1/2 animate-slideUp z-10">
-    <h3 className="text-3xl md:text-4xl font-bold text-sky-700 mb-4">
-      Elevate Your Business with <span className="text-blue-500">Wholesale</span>
-    </h3>
-    <p className="text-sky-600 text-lg mb-6">
-      Explore the latest tech gadgets with unbeatable prices, fast shipping, and a seamless wholesale experience.
-    </p>
-    <a
-      href="#products"
-      className="inline-block px-8 py-3 bg-gradient-to-r from-sky-400 to-blue-400 text-white font-semibold rounded-full hover:scale-105 transition-transform duration-300"
-    >
-      Explore Products
-    </a>
-  </div>
-
-  {/* Right Side - Circular 3D Product Preview */}
-  <div className="md:w-1/2 flex justify-center items-center relative z-10">
-    <div className="w-72 h-72 md:w-80 md:h-80 rounded-full border-4 border-dashed border-sky-300/50 flex items-center justify-center shadow-xl animate-bounce-slow relative overflow-hidden">
-      {/* Hand-drawn effect using SVG */}
-      <svg className="absolute w-full h-full" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <circle cx="50" cy="50" r="48" stroke="url(#gradient)" strokeWidth="2" strokeDasharray="4 2" />
-        <defs>
-          <linearGradient id="gradient" x1="0" y1="0" x2="100" y2="100">
-            <stop stopColor="#3b82f6" />
-            <stop offset="1" stopColor="#0ea5e9" />
-          </linearGradient>
-        </defs>
-      </svg>
-
-      {/* Product Image */}
-      <img
-        src="https://images.pexels.com/photos/5082576/pexels-photo-5082576.jpeg?auto=compress&cs=tinysrgb&w=400"
-        alt="Product"
-        className="w-48 h-48 md:w-56 md:h-56 object-cover rounded-full shadow-2xl transition-transform duration-500 hover:scale-110 animate-float"
-      />
-    </div>
-  </div>
-
-  {/* Background floating circles */}
-  <div className="absolute top-10 left-10 w-40 h-40 rounded-full bg-blue-200/30 animate-spin-slow blur-2xl"></div>
-  <div className="absolute bottom-10 right-20 w-60 h-60 rounded-full bg-sky-300/20 animate-spin-slow-reverse blur-3xl"></div>
-
-  {/* Animations */}
-  <style>
-    {`
-      @keyframes float {
-        0%, 100% { transform: translateY(0);}
-        50% { transform: translateY(-20px);}
-      }
-      .animate-float {
-        animation: float 6s ease-in-out infinite;
-      }
-
-      @keyframes bounce-slow {
-        0%, 100% { transform: translateY(0);}
-        50% { transform: translateY(-10px);}
-      }
-      .animate-bounce-slow {
-        animation: bounce-slow 8s ease-in-out infinite;
-      }
-
-      @keyframes spin-slow {
-        0% { transform: rotate(0deg);}
-        100% { transform: rotate(360deg);}
-      }
-      .animate-spin-slow {
-        animation: spin-slow 40s linear infinite;
-      }
-
-      @keyframes spin-slow-reverse {
-        0% { transform: rotate(360deg);}
-        100% { transform: rotate(0deg);}
-      }
-      .animate-spin-slow-reverse {
-        animation: spin-slow-reverse 50s linear infinite;
-      }
-    `}
-  </style>
-</section>
-
-
-        {/* Custom Animations */}
-        <style>
-          {`
-            .animate-fadeIn {
-              animation: fadeIn 1s ease both;
-            }
-            .animate-slideUp {
-              animation: slideUp 1s ease both;
-            }
-            .animate-slideIn {
-              animation: slideIn 1.2s cubic-bezier(.68,-0.55,.27,1.55) both;
-            }
-            .animate-gradient {
-              background-size: 200% 200%;
-              animation: gradientMove 3s ease-in-out infinite;
-            }
-            @keyframes fadeIn {
-              from { opacity: 0; transform: translateY(20px);}
-              to { opacity: 1; transform: translateY(0);}
-            }
-            @keyframes slideUp {
-              from { opacity: 0; transform: translateY(40px);}
-              to { opacity: 1; transform: translateY(0);}
-            }
-            @keyframes slideIn {
-              from { opacity: 0; transform: translateX(80px);}
-              to { opacity: 1; transform: translateX(0);}
-            }
-            @keyframes gradientMove {
-              0% { background-position: 0% 50%; }
-              50% { background-position: 100% 50%; }
-              100% { background-position: 0% 50%; }
-            }
-            .perspective {
-              perspective: 1000px;
-            }
-            .transform-style-preserve-3d {
-              transform-style: preserve-3d;
-            }
-            .backface-hidden {
-              backface-visibility: hidden;
-            }
-            .rotate-y-180 {
-              transform: rotateY(180deg);
-            }
-          `}
-        </style>
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-4 md:gap-6 max-w-7xl mx-auto">
+          {categories.map((category) => (
+            <div
+              key={category.id}
+              onClick={() => handleCategoryClick(category.name)}
+              className="group bg-white rounded-lg shadow-md hover:shadow-xl transition-all duration-300 cursor-pointer border border-gray-100 hover:border-[#54B1CE] overflow-hidden"
+            >
+              <div className="p-4 text-center">
+                <div className="w-20 h-20 mx-auto mb-3 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform duration-300 overflow-hidden border-2 border-gray-200 group-hover:border-[#54B1CE]">
+                  <img
+                    src={category.image}
+                    alt={category.name}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <h3 className="font-semibold text-gray-800 group-hover:text-[#54B1CE] transition-colors">
+                  {category.name}
+                </h3>
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
-    </>
+
+      {/* Popular Products Section */}
+      <div className="flex flex-col items-center pt-14 w-full">
+        <p className="text-2xl font-medium text-left w-full max-w-7xl mx-auto">Popular products</p>
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 flex-col items-center gap-6 mt-6 pb-14 w-full max-w-7xl mx-auto">
+          {filteredProducts.length > 0 ? (
+            filteredProducts.map((product, index) => (
+              <ProductCard key={index} product={product} />
+            ))
+          ) : (
+            <p className="text-gray-500 col-span-full mt-4">No products found.</p>
+          )}
+        </div>
+        <button
+          onClick={() => navigate("/all-products")}
+          className="px-12 py-2.5 border rounded text-gray-500/70 hover:bg-slate-50/90 transition"
+        >
+          See more
+        </button>
+      </div>
+
+      {/* Quick Stats Section */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-12 bg-gray-50 rounded-lg p-6 max-w-7xl mx-auto">
+        <div className="text-center">
+          <div className="text-3xl font-bold text-[#54B1CE]">1000+</div>
+          <div className="text-gray-600">Products Available</div>
+        </div>
+        <div className="text-center">
+          <div className="text-3xl font-bold text-[#54B1CE]">50+</div>
+          <div className="text-gray-600">Brands</div>
+        </div>
+        <div className="text-center">
+          <div className="text-3xl font-bold text-[#54B1CE]">24/7</div>
+          <div className="text-gray-600">Customer Support</div>
+        </div>
+      </div>
+
+      {/* Flow Diagram Section */}
+      <div className="bg-white py-16 px-6 md:px-16 lg:px-32 overflow-x-hidden">
+        <h2 className="text-3xl font-bold text-center text-[#54B1CE]">
+          How Our Accessories Can Help You
+        </h2>
+        <p className="text-center mt-2 text-gray-600">
+          Explore use cases and find products suited for your business
+        </p>
+
+        <div className="flex flex-row md:flex-row justify-start items-center mt-12 gap-16 overflow-x-auto scrollbar-hide relative max-w-7xl mx-auto">
+          {useCases.map((useCase, index) => (
+            <div
+              key={useCase.id}
+              className="flex flex-col items-center relative group animate-fade-in"
+              style={{ animationDelay: `${index * 0.3}s` }}
+            >
+              <div className="bg-[#54B1CE] w-20 h-20 rounded-full flex items-center justify-center mb-4 overflow-hidden transform transition-transform duration-500 group-hover:scale-110 group-hover:animate-bounce">
+                <img
+                  src={useCase.icon}
+                  alt={useCase.title}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              <p className="font-semibold text-lg text-[#54B1CE] text-center">
+                {useCase.title}
+              </p>
+              <p className="text-center text-gray-600 mt-2 max-w-xs">
+                {useCase.description}
+              </p>
+              {index !== useCases.length - 1 && (
+                <div className="absolute top-10 md:top-10 left-full md:left-auto md:right-[-90px] w-24 h-1 flex items-center justify-start">
+                  <div className="w-full h-1 relative overflow-hidden rounded">
+                    <div className="h-1 w-full bg-gradient-to-r from-[#54B1CE] via-white to-[#54B1CE] animate-gradient-move absolute"></div>
+                    <div className="w-4 h-4 rotate-45 border-t-2 border-r-2 border-[#54B1CE] absolute right-0 -top-1/2"></div>
+                  </div>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* NewsLetter Section */}
+      <div className="relative flex flex-col items-center justify-center text-center py-20 bg-white overflow-hidden">
+        <div className="absolute w-80 h-80 md:w-96 md:h-96 rounded-full bg-gradient-to-r from-[#54B1CE]/20 via-white/0 to-[#54B1CE]/20 animate-pulse-slow z-0"></div>
+        <div className="relative flex flex-col items-center justify-center w-72 h-72 md:w-96 md:h-96 rounded-full bg-white border-2 border-[#54B1CE] shadow-xl z-10 p-6">
+          <h1 className="text-2xl md:text-4xl font-bold text-[#054b6d] leading-snug">
+            Subscribe now & get 20% off
+          </h1>
+          <p className="text-gray-500/80 mt-4 text-sm md:text-base max-w-xs">
+            Join our newsletter to get exclusive offers on premium accessories — watches, earbuds, chargers, handsfree devices, and more.
+          </p>
+        </div>
+        <div className="flex flex-col md:flex-row items-center justify-center gap-4 mt-10 w-full max-w-xl z-10">
+          <input
+            className="border border-gray-300 rounded-md md:rounded-r-none h-12 px-4 w-full outline-none focus:ring-2 focus:ring-[#54B1CE]"
+            type="email"
+            placeholder="Enter your email"
+          />
+          <button className="h-12 px-8 md:px-12 bg-[#54B1CE] text-white font-semibold rounded-md md:rounded-l-none hover:bg-[#3a8bbd] transition">
+            Subscribe
+          </button>
+        </div>
+      </div>
+
+      {/* CSS Animations */}
+      <style>
+        {`
+          @keyframes fadeIn {
+            0% { opacity: 0; transform: translateY(20px); }
+            100% { opacity: 1; transform: translateY(0); }
+          }
+          .animate-fade-in {
+            animation: fadeIn 0.6s ease forwards;
+          }
+
+          @keyframes gradientMove {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+          }
+          .animate-gradient-move {
+            animation: gradientMove 1.5s linear infinite;
+          }
+
+          @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
+          }
+          .animate-bounce {
+            animation: bounce 0.5s ease infinite;
+          }
+
+          @keyframes pulse-slow {
+            0%, 100% { transform: scale(1); opacity: 0.6; }
+            50% { transform: scale(1.1); opacity: 0.8; }
+          }
+          .animate-pulse-slow {
+            animation: pulse-slow 8s ease-in-out infinite;
+          }
+
+          .scrollbar-hide::-webkit-scrollbar {
+            display: none;
+          }
+          .scrollbar-hide {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+          }
+        `}
+      </style>
+    </div>
   );
 };
 
-export default Home;
+export default HomePage;
