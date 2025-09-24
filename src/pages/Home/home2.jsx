@@ -13,10 +13,10 @@ const ProductCard = ({ product }) => (
 
 // Mock assets (replace with actual image paths or imports)
 const assets = {
-  header_headphone_image: "path/to/headphone-image.jpg",
-  header_playstation_image: "path/to/playstation-image.jpg",
-  header_macbook_image: "path/to/macbook-image.jpg",
-  arrow_icon: "path/to/arrow-icon.png",
+  header_headphone_image: "https://images-cdn.ubuy.co.in/66cb15b29c6bb53bf6591ff4-maho-beats-headphones-wireless-bluetooth.jpg",
+  header_playstation_image: "https://4kwallpapers.com/images/wallpapers/playstation-5-pro-1920x1080-19032.jpg",
+  header_macbook_image: "https://platform.theverge.com/wp-content/uploads/sites/2/chorus/uploads/chorus_asset/file/23759755/bfarsace_190101_5333_0002.jpg?quality=90&strip=all&crop=16.666666666667%2C0%2C66.666666666667%2C100&w=2400",
+  arrow_icon: "",
 };
 
 // Mock products data (replace with actual data from context or API)
